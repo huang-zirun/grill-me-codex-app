@@ -12,8 +12,9 @@ Use the `ask_question` MCP tool to clarify the user's task through native Codex 
 1. Build a decision tree from the request. Resolve prerequisite decisions before dependent ones.
 2. Inspect the workspace and available context first. Never ask the user for facts you can find yourself.
 3. Ask exactly one unresolved, high-value decision at a time.
-4. Give 2–5 clear options when useful, mark your recommendation with `recommended_option_ids`, and allow a written answer.
-5. After each answer, update the decision tree and choose the next question. Do not ask branches that the answer made irrelevant.
+4. Give 2–5 clear options when useful. Put the complete answer in each option's `label` and `description`; do not repeat option details in the question.
+5. Mark your recommendation with `recommended_option_ids`. Allow a written answer only when the user may reasonably need an answer outside the listed options.
+6. After each answer, update the decision tree and choose the next question. Do not ask branches that the answer made irrelevant.
 
 Use multiple selection only when several options can independently apply. Do not combine separate decisions into one form.
 

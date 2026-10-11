@@ -29374,13 +29374,15 @@ var StdioServerTransport = class {
 };
 
 // src/server.mjs
+var WRITE_IN_OPTION_ID = "__write_in__";
+var ELICITATION_TIMEOUT_MS = 60 * 60 * 1e3;
 var optionSchema = external_exports3.object({
-  id: external_exports3.string(),
-  label: external_exports3.string(),
-  description: external_exports3.string().default("")
+  id: external_exports3.string().describe("Stable option identifier."),
+  label: external_exports3.string().describe("Short answer name shown in the option."),
+  description: external_exports3.string().default("").describe("Complete answer details shown in the option.")
 });
 var questionSchema = external_exports3.object({
-  question: external_exports3.string(),
+  question: external_exports3.string().describe("The question only. Do not include options or answer explanations."),
   options: external_exports3.array(optionSchema).default([]),
   is_multi_select: external_exports3.boolean().default(false),
   recommended_option_ids: external_exports3.array(external_exports3.string()).default([]),
@@ -29390,12 +29392,17 @@ function buildElicitation(input) {
   const recommended = new Set(input.recommended_option_ids);
   const labels = input.options.map((option) => ({
     const: option.id,
-    title: `${option.label}${recommended.has(option.id) ? "\uFF08\u63A8\u8350\uFF09" : ""}`
+    title: `${option.label}${option.description ? `\uFF1A${option.description}` : ""}${recommended.has(option.id) ? "\uFF08\u63A8\u8350\uFF09" : ""}`
   }));
-  const details = input.options.filter((option) => option.description).map((option) => `- ${option.label}\uFF1A${option.description}`).join("\n");
   const properties = {};
   const required2 = [];
   if (input.options.length) {
+    if (input.allow_write_in) {
+      labels.push({
+        const: WRITE_IN_OPTION_ID,
+        title: "\u5176\u4ED6\u7B54\u6848\uFF08\u624B\u52A8\u586B\u5199\uFF09"
+      });
+    }
     if (input.is_multi_select) {
       properties.selected_option_ids = {
         type: "array",
@@ -29411,26 +29418,38 @@ function buildElicitation(input) {
         default: input.recommended_option_ids[0]
       };
     }
-    if (!input.allow_write_in) {
-      required2.push(input.is_multi_select ? "selected_option_ids" : "selected_option_id");
-    }
+    required2.push(input.is_multi_select ? "selected_option_ids" : "selected_option_id");
   }
-  if (input.allow_write_in || !input.options.length) {
+  if (!input.options.length) {
     properties.write_in_response = {
       type: "string",
-      title: input.options.length ? "\u5176\u4ED6\u7B54\u6848\uFF08\u53EF\u9009\uFF09" : "\u56DE\u7B54"
+      title: "\u56DE\u7B54"
     };
-    if (!input.options.length) required2.push("write_in_response");
+    required2.push("write_in_response");
   }
   return {
     mode: "form",
-    message: details ? `${input.question}
-
-${details}` : input.question,
+    message: input.question,
     requestedSchema: {
       type: "object",
       properties,
       ...required2.length ? { required: required2 } : {}
+    }
+  };
+}
+function buildWriteInElicitation(question) {
+  return {
+    mode: "form",
+    message: question,
+    requestedSchema: {
+      type: "object",
+      properties: {
+        write_in_response: {
+          type: "string",
+          title: "\u5176\u4ED6\u7B54\u6848"
+        }
+      },
+      required: ["write_in_response"]
     }
   };
 }
@@ -29445,7 +29464,7 @@ function normalizeResult(result) {
 }
 function createServer() {
   const server = new McpServer(
-    { name: "grill-me-codex-app", version: "0.1.0" },
+    { name: "grill-me-codex-app", version: "0.1.1" },
     {
       instructions: "Use ask_question for one unresolved decision at a time. It opens a native form in Codex App and returns the user's structured answer."
     }
@@ -29454,18 +29473,37 @@ function createServer() {
     "ask_question",
     {
       title: "Ask one question",
-      description: "Ask the user one decision question in a native Codex App form. Use one call per question.",
+      description: "Ask one decision in a native Codex App form. Put only the question in question and each complete answer in its option.",
       inputSchema: questionSchema,
       annotations: { readOnlyHint: true }
     },
     async (input) => {
-      const answer = normalizeResult(await server.server.elicitInput(buildElicitation(input)));
-      return {
-        content: [{ type: "text", text: JSON.stringify(answer) }],
-        structuredContent: answer
-      };
+      const answer = normalizeResult(
+        await server.server.elicitInput(buildElicitation(input), {
+          timeout: ELICITATION_TIMEOUT_MS
+        })
+      );
+      if (answer.status === "answered" && answer.selected_option_ids.includes(WRITE_IN_OPTION_ID)) {
+        const writeIn = normalizeResult(
+          await server.server.elicitInput(buildWriteInElicitation(input.question), {
+            timeout: ELICITATION_TIMEOUT_MS
+          })
+        );
+        if (writeIn.status !== "answered") return toolResult(writeIn);
+        answer.selected_option_ids = answer.selected_option_ids.filter(
+          (id) => id !== WRITE_IN_OPTION_ID
+        );
+        answer.write_in_response = writeIn.write_in_response;
+      }
+      return toolResult(answer);
     }
   );
+  function toolResult(answer) {
+    return {
+      content: [{ type: "text", text: JSON.stringify(answer) }],
+      structuredContent: answer
+    };
+  }
   return server;
 }
 async function main() {
@@ -29479,6 +29517,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 }
 export {
   buildElicitation,
+  buildWriteInElicitation,
   createServer,
   main,
   normalizeResult,
