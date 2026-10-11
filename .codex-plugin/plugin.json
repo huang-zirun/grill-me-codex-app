@@ -1,0 +1,38 @@
+{
+  "name": "grill-me",
+  "version": "0.1.0",
+  "description": "Clarify plans and designs through one-question-at-a-time interviews in Codex App native forms.",
+  "author": {
+    "name": "HUANG ZIRUN",
+    "url": "https://github.com/huang-zirun"
+  },
+  "homepage": "https://github.com/huang-zirun/grill-me-codex-app",
+  "repository": "https://github.com/huang-zirun/grill-me-codex-app",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "interview",
+    "planning",
+    "elicitation",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Grill Me",
+    "shortDescription": "Clarify a plan one decision at a time",
+    "longDescription": "Grill Me interviews you through Codex App native forms. It investigates facts first, follows decision dependencies, asks one question at a time, and recommends an answer until the task is clear enough to confirm.",
+    "developerName": "HUANG ZIRUN",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/huang-zirun/grill-me-codex-app",
+    "defaultPrompt": [
+      "Grill me on this task before implementation.",
+      "Interview me until this plan has no important ambiguity."
+    ],
+    "brandColor": "#F97316",
+    "screenshots": []
+  }
+}

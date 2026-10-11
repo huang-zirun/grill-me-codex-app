@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grill Me"
+  short_description: "Clarify a plan one decision at a time"
+  default_prompt: "Interview me with native forms until we share a complete understanding of this task."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,23 @@
+{
+  "name": "grill-me-codex-app",
+  "interface": {
+    "displayName": "Grill Me for Codex App"
+  },
+  "plugins": [
+    {
+      "name": "grill-me",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL",
+        "products": [
+          "CODEX"
+        ]
+      },
+      "category": "Productivity"
+    }
+  ]
+}
