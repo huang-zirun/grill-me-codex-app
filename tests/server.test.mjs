@@ -105,6 +105,25 @@ test("normalizes answers, skips, and cancellations", () => {
   assert.equal(normalizeResult({ action: "cancel" }).status, "cancelled");
 });
 
+test("exposes only grill_question", async () => {
+  const server = createServer();
+  const client = new Client(
+    { name: "test-client", version: "1.0.0" },
+    { capabilities: {} },
+  );
+  const [clientTransport, serverTransport] =
+    InMemoryTransport.createLinkedPair();
+
+  await server.connect(serverTransport);
+  await client.connect(clientTransport);
+
+  const result = await client.listTools();
+  assert.deepEqual(result.tools.map((tool) => tool.name), ["grill_question"]);
+
+  await client.close();
+  await server.close();
+});
+
 test("completes a choice without showing a text field", async () => {
   const server = createServer();
   const client = new Client(
@@ -129,7 +148,7 @@ test("completes a choice without showing a text field", async () => {
   await server.connect(serverTransport);
   await client.connect(clientTransport);
   const result = await client.callTool({
-    name: "ask_question",
+    name: "grill_question",
     arguments: {
       question: "优先保证什么？",
       options: [{ id: "simple", label: "简单", description: "" }],
@@ -183,7 +202,7 @@ test("asks for text only after the write-in option is selected", async () => {
   await server.connect(serverTransport);
   await client.connect(clientTransport);
   const result = await client.callTool({
-    name: "ask_question",
+    name: "grill_question",
     arguments: {
       question: "优先保证什么？",
       options: [{ id: "simple", label: "简单", description: "减少维护成本" }],

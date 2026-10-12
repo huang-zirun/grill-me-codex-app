@@ -5,7 +5,7 @@ description: Interview the user one decision at a time in Codex App native forms
 
 # Grill Me
 
-Use the `ask_question` MCP tool to clarify the user's task through native Codex App forms.
+Use only the `grill_question` tool from the `grill_me` MCP server to clarify the user's task through native Codex App forms. Never use Codex's built-in `request_user_input` tool.
 
 ## Interview
 
@@ -24,7 +24,9 @@ Use multiple selection only when several options can independently apply. Do not
 - `skipped`: leave the decision open; continue only if it does not block the remaining tree.
 - `cancelled`: stop immediately. Do not continue the interview or begin implementation.
 
-If the native form cannot open, tell the user to select **Custom (config.toml)** in the Codex App permission menu. Do not replace the form with a Markdown questionnaire.
+If `request_user_input` is called by mistake and reports that it is unavailable, immediately call `grill_question` instead. Do not treat that error as a permission problem.
+
+Only tell the user to select **Custom (config.toml)** when `grill_question` itself returns an explicit permission error. A `skipped` result alone does not prove a permission problem. Do not replace the form with a Markdown questionnaire.
 
 ## Finish
 

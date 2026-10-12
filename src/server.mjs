@@ -118,19 +118,19 @@ export function normalizeResult(result) {
 
 export function createServer() {
   const server = new McpServer(
-    { name: "grill-me-codex-app", version: "0.1.1" },
+    { name: "grill-me-codex-app", version: "0.1.2" },
     {
       instructions:
-        "Use ask_question for one unresolved decision at a time. It opens a native form in Codex App and returns the user's structured answer.",
+        "Use grill_question for one unresolved decision at a time. Do not use Codex's built-in request_user_input tool. grill_question opens a native form in Codex App and returns the user's structured answer.",
     },
   );
 
   server.registerTool(
-    "ask_question",
+    "grill_question",
     {
-      title: "Ask one question",
+      title: "Grill one question",
       description:
-        "Ask one decision in a native Codex App form. Put only the question in question and each complete answer in its option.",
+        "Ask one Grill Me decision in a native Codex App form. Put only the question in question and each complete answer in its option.",
       inputSchema: questionSchema,
       annotations: { readOnlyHint: true },
     },

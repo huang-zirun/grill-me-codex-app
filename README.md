@@ -44,7 +44,7 @@ sandbox_mode = "danger-full-access"
 Custom (config.toml)
 ```
 
-不要选择 `Full access`。该预设会自动拒绝 MCP 表单，表现为工具立即返回 `skipped`。
+不要选择 `Full access`。部分版本会在该预设下自动拒绝 MCP 表单。仅看到 `skipped` 还不能断定是权限问题，应先确认实际调用的是 `grill_question`。
 
 ## 使用
 
@@ -55,6 +55,8 @@ $grill-me 在开始实现前，逐题帮我澄清这个需求。
 ```
 
 每次原生表单出现后，选择答案或填写自己的答案。取消表单会结束整场访谈。
+
+Skill 只调用 `grill_me` 服务的 `grill_question` 工具，不使用 Codex 内置的 `request_user_input`。如果日志提示 `request_user_input is unavailable in Default mode`，说明模型选错了工具，不是权限配置错误。
 
 ## 卸载
 
@@ -81,7 +83,7 @@ npm run build
 npm run check
 ```
 
-核心代码在 `src/server.mjs`，只公开一个 MCP 工具：`ask_question`。
+核心代码在 `src/server.mjs`，只公开一个 MCP 工具：`grill_question`。
 
 ## 许可证
 
