@@ -16,7 +16,7 @@
 ```text
 Grill Me Skill
     ↓
-ask_question MCP 工具
+grill_me 服务的 grill_question MCP 工具
     ↓
 Codex App 原生表单
     ↓
@@ -39,6 +39,7 @@ Codex App 原生表单
 - [x] 完整答案只显示在选项中
 - [x] 自由填写按需显示
 - [x] 单题等待时间延长到 1 小时
+- [x] 避免与 Codex 内置 `request_user_input` 混淆
 
 ## 不做
 
